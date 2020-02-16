@@ -56,7 +56,7 @@ ROOT_URLCONF = 'chatApplication.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates"), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,6 +79,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'TEST': {
+            'NAME': os.path.join(BASE_DIR, 'db_test.sqlite3')
+        }
     }
 }
 
@@ -115,11 +118,16 @@ USE_L10N = True
 
 USE_TZ = True
 
+LOGOUT_REDIRECT_URL = '/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 # Channels
 ASGI_APPLICATION = 'chatApplication.routing.application'

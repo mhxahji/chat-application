@@ -13,10 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, reverse_lazy
+from django.views.generic import RedirectView
+
+from chatApplication.views import signup
 
 urlpatterns = [
+    path('', RedirectView.as_view(url=reverse_lazy('chat-index')), name="index"),
     path('chat/', include('chat.urls')),
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('signup/', signup, name='signup'),
 ]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
