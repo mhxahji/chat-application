@@ -162,3 +162,7 @@ img {
     left:0px;
     bottom:0;
 }
+
+.table-primary {
+    background-color: #b8daff;
+}

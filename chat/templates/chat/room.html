@@ -11,7 +11,7 @@
             </div>
           </div>
           <div class="panel-body msg_container_base" id="messages" onload="scrollBottom()">
-            {%for message in room.messages.all%}
+            {%for message in room.messages_last_50%}
             <div class="row msg_container base_sent">
               <div class="col-md-10 col-xs-10">
                 <div class="messages msg_sent">

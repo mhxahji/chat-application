@@ -23,6 +23,10 @@ class ChatRoom(models.Model):
     def count_messages(self):
         return self.messages.count()
 
+    @property
+    def messages_last_50(self):
+        return reversed(self.messages.all().order_by('-creation_date')[:50])
+
     class Meta:
         ordering = ('name',)
         verbose_name = _('Chat Room')

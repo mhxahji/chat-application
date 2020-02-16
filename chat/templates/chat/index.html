@@ -26,17 +26,17 @@
             <h3 class="panel-title"><span class="glyphicon glyphicon-book"></span> Rooms</h3>
           </div>
         </div>
-        <table class="table table-striped table-hover">
+        <table class="table">
           <tbody>
           <tr><td colspan="2">{% trans "New Chat Room?" %}</td></tr>
           <tr>
             <td><input id="room-name-input" type="text"/></td>
             <td><input id="room-name-submit" type="button" value="Enter"/></td>
           </tr>
-          {% for room in rooms %}
-          <tr>
-            <td><a href="{% url "room" room_id=room.id%}">{{ room.name }}</a></td>
-            <td>{{ room.count_messages }} {% if room.count_messages == 1 %}{%trans "message" %}{%else%}{%trans "messages" %}{%endif%}</td>
+          {% for room_obj in rooms %}
+          <tr {%if room_obj.id == room.id %}class="table-primary"{%endif%}>
+            <td><a href="{% url "room" room_id=room_obj.id%}">{{ room_obj.name }}</a></td>
+            <td>{{ room_obj.count_messages }} {% if room_obj.count_messages == 1 %}{%trans "message" %}{%else%}{%trans "messages" %}{%endif%}</td>
           </tr>
           {% endfor %}
           </tbody>
