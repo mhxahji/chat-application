@@ -1,12 +1,25 @@
 from asgiref.sync import async_to_sync
+from channels.auth import login
 from channels.generic.websocket import WebsocketConsumer
 import json
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.forms import model_to_dict
+
+from chat.models import ChatRoom
+from utils.database_functions import create_message
+from utils.utils import get_date_with_template_format
 
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = 'chat_%s' % self.room_name
+        self.user = self.scope["user"]
+        if self.user.is_anonymous:
+            return
+
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.room = ChatRoom.objects.get(pk=self.room_id)
+        self.room_group_name = 'chat_%s' % self.room_id
 
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
@@ -27,21 +40,21 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
+        message_object = create_message(message, self.room, self.user)
+        # Send message to WebSocket
+        message_dict = model_to_dict(message_object)
+        message_dict['user_to_show'] = message_object.user_to_show
+        message_dict['creation_date'] = get_date_with_template_format(message_object.creation_date)
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message
+                'message': message_dict
             }
         )
 
     # Receive message from room group
     def chat_message(self, event):
-        message = event['message']
-
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'message': message
-        }))
+        self.send(text_data=json.dumps(event['message']))

@@ -1,25 +1,65 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Chat Room {{ room_name }}</title>
-</head>
-<body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br/>
-    <input id="chat-message-input" type="text" size="100"/><br/>
-    <input id="chat-message-submit" type="button" value="Send"/>
-</body>
+{% extends "chat/index.html"%}
+{% load i18n %}
+{%block title%}{% trans 'Chat Room' %} {{ room.name }}{%endblock%}
+{%block content%}
+    <div class="col-sm-8">
+      <div class="chatbody">
+        <div class="panel panel-primary">
+          <div class="panel-heading top-bar">
+            <div class="col-md-8 col-xs-8">
+              <h3 class="panel-title"><span class="glyphicon glyphicon-comment"></span>Chat Room - {{ room.name }}</h3>
+            </div>
+          </div>
+          <div class="panel-body msg_container_base" id="messages" onload="scrollBottom()">
+            {%for message in room.messages.all%}
+            <div class="row msg_container base_sent">
+              <div class="col-md-10 col-xs-10">
+                <div class="messages msg_sent">
+                  <strong>{{message.user_to_show}}</strong>
+                  <p>{{message.message}}</p>
+                  <time datetime="{{message.creation_date}}">{{message.creation_date}}</time>
+                </div>
+              </div>
+            </div>
+            {%endfor%}
+          </div>
+          <div class="panel-footer">
+            <div class="input-group">
+              <input id="chat-message-input" type="text" class="form-control input-sm chat_input"
+                     placeholder="Write your message here..."/>
+              <span class="input-group-btn">
+                        <button class="btn btn-primary btn-sm" id="chat-message-submit"><i class="fa fa-send fa-1x"
+                                                                                aria-hidden="true"></i></button>
+                        </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
 <script>
-    var roomName = "{{ room_name|escapejs }}";
 
     var chatSocket = new WebSocket(
         'ws://' + window.location.host +
-        '/ws/chat/' + roomName + '/');
+        '/ws/chat/{{ room.id }}/');
 
     chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);
         var message = data['message'];
-        document.querySelector('#chat-log').value += (message + '\n');
+        let getNodes = str => new DOMParser().parseFromString(str, 'text/html').body.childNodes;
+        let str = "<div class=\"row msg_container base_sent\">"+
+                        "<div class=\"col-md-10 col-xs-10\">"+
+                            "<div class=\"messages msg_sent\">"+
+                                "<strong> " +data.user_to_show + "</strong>"+
+                                "<p>" + data.message + "</p>"+
+                                "<time datetime=\"" + data.creation_date + "\">" + data.creation_date + "</time>"+
+                            "</div>"+
+                        "</div>"+
+                  "</div>";
+        let nodes= getNodes(str);
+        let messages = document.getElementById('messages')
+        messages.appendChild(nodes[0]);
+        messages.scrollTop = messages.scrollHeight;
     };
 
     chatSocket.onclose = function(e) {
@@ -42,5 +82,12 @@
 
         messageInputDom.value = '';
     };
+
+    window.onload = function(e){
+      let messages = document.getElementById('messages');
+      messages.scrollTop = messages.scrollHeight;
+    }
 </script>
-</html>
+
+{% endblock %}
+
