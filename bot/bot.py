@@ -1,6 +1,7 @@
 from django.utils import timezone
 
-from utils.constants import STOCK_CODE, BOT_CODES, USER_ERROR_COMMAND, MESSAGE_ERROR_COMMAND
+from utils.constants import STOCK_CODE, BOT_CODES, USER_ERROR_COMMAND, MESSAGE_ERROR_COMMAND, MESSAGE_EMPTY_COMMAND, \
+    EMPTY_VALUE
 from utils.request_api import get_csv_response_api
 from django.utils.translation import gettext_lazy as _
 
@@ -40,6 +41,8 @@ def process_message_with_stock_code(message):
     rows_csv = get_csv_response_api(stock_code)
     row_data = rows_csv[1]
     open_data = row_data[3]
+    if open_data == EMPTY_VALUE:
+        return error_on_data_bot_response()
     return _('%s quote is $%s per share') % (stock_code.upper(), open_data)
 
 
@@ -53,5 +56,13 @@ def error_bot_response():
     return {
         'user_to_show': str(_(USER_ERROR_COMMAND)),
         'message': str(_(MESSAGE_ERROR_COMMAND)),
+        'creation_date': get_date_with_template_format(timezone.now)
+    }
+
+
+def error_on_data_bot_response():
+    return {
+        'user_to_show': str(_(USER_ERROR_COMMAND)),
+        'message': str(_(MESSAGE_EMPTY_COMMAND)),
         'creation_date': get_date_with_template_format(timezone.now)
     }

@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from bot.bot import error_bot_response, get_name_code_from_message
-from utils.constants import BOT_NAME, USER_ERROR_COMMAND, MESSAGE_ERROR_COMMAND, STOCK_CODE
+from bot.bot import error_bot_response, get_name_code_from_message, error_on_data_bot_response
+from utils.constants import BOT_NAME, USER_ERROR_COMMAND, MESSAGE_ERROR_COMMAND, STOCK_CODE, MESSAGE_EMPTY_COMMAND
 from utils.database_functions import create_message, create_room
 from .models import ChatRoom, ChatMessage
 
@@ -44,26 +44,42 @@ class ChatRoomTestCase(TestCase):
 
     def test_create_bot_message(self):
         """Creating bot message"""
-        message_command = "/stock=ajjds"
-        message_obj = create_message(message_command, self.room, self.user)
-        self.assertEquals(message_obj.bot_message, True)
-        self.assertEquals(message_obj.user_to_show, BOT_NAME)
+        message_command = "/stock=aapl.us"
+        created, message_obj = create_message(message_command, self.room, self.user)
+        self.assertEquals(created, True)
+        self.assertEquals(message_obj['bot_message'], True)
+        self.assertEquals(message_obj['user_to_show'], BOT_NAME)
         self.assertEquals(get_name_code_from_message(message_command), STOCK_CODE['name'])
 
     def test_show_user_from_normal_message(self):
         """Creating bot message"""
-        message_obj = create_message("normal message", self.room, self.user)
-        self.assertEquals(message_obj.bot_message, False)
-        self.assertEquals(message_obj.user_to_show, self.user.show_name)
+        created, message_obj = create_message("normal message", self.room, self.user)
+        self.assertEquals(created, True)
+        self.assertEquals(message_obj['bot_message'], False)
+        self.assertEquals(message_obj['user_to_show'], self.user.show_name)
 
     def test_try_to_create_bot_message_with_incorrect_command_format(self):
         """Sending incorrect format for creating bot message"""
         message_command = "/stock=ajjds sjhds"
-        message_obj = create_message(message_command, self.room, self.user)
-        self.assertEquals(message_obj, None)
+        created, message_obj = create_message(message_command, self.room, self.user)
+        self.assertEquals(created, False)
+        self.assertEquals(message_obj['message'], MESSAGE_ERROR_COMMAND)
+
+    def test_try_to_create_bot_message_with_empty_response(self):
+        """Sending command with empty for creating bot message"""
+        message_command = "/stock=ajjds"
+        created, message_obj = create_message(message_command, self.room, self.user)
+        self.assertEquals(created, False)
+        self.assertEquals(message_obj['message'], MESSAGE_EMPTY_COMMAND)
 
     def test_error_message_with_incorrect_command_format(self):
         """Seeing the message error when incorrect command format"""
         message = error_bot_response()
         self.assertEquals(message['user_to_show'], USER_ERROR_COMMAND)
         self.assertEquals(message['message'], MESSAGE_ERROR_COMMAND)
+
+    def test_error_message_with_empty_response(self):
+        """Seeing the message error when command response is empty"""
+        message = error_on_data_bot_response()
+        self.assertEquals(message['user_to_show'], USER_ERROR_COMMAND)
+        self.assertEquals(message['message'], MESSAGE_EMPTY_COMMAND)
