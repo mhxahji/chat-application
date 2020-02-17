@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from utils.constants import STOCK_CODE, BOT_CODES
+from utils.constants import STOCK_CODE, BOT_CODES, USER_ERROR_COMMAND, MESSAGE_ERROR_COMMAND
 from utils.request_api import get_csv_response_api
 from django.utils.translation import gettext_lazy as _
 
@@ -15,7 +15,7 @@ def is_bot_message(message):
 
 
 def format_prefix(prefix):
-    return '/%s='% prefix
+    return '/%s=' % prefix
 
 
 def is_prefix_bot_message(message, prefix):
@@ -51,7 +51,7 @@ def process_bot_message(message):
 
 def error_bot_response():
     return {
-        'user_to_show': str(_('Error on command')),
-        'message': str(_('The format of your command is incorrect, correct it and try again')),
+        'user_to_show': str(_(USER_ERROR_COMMAND)),
+        'message': str(_(MESSAGE_ERROR_COMMAND)),
         'creation_date': get_date_with_template_format(timezone.now)
     }

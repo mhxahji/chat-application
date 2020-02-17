@@ -5,3 +5,5 @@ channels-redis==2.4.1
 selenium==3.141.0
 requests==2.22.0
 django-tz-detect==0.3.0
+django-nose==1.4.6
+coverage==5.0.3

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tz_detect',
+    'django_nose',
     'chat',
 ]
 
@@ -142,3 +143,11 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Django nose config
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=chat, bot, utils',
+]
