@@ -40,10 +40,10 @@ def process_message_with_stock_code(message):
     stock_code = message.replace(format_prefix(STOCK_CODE['prefix']), '')
     rows_csv = get_csv_response_api(stock_code)
     row_data = rows_csv[1]
-    open_data = row_data[3]
-    if open_data == EMPTY_VALUE:
+    closed_data = row_data[6]
+    if closed_data == EMPTY_VALUE:
         return error_on_data_bot_response()
-    return _('%s quote is $%s per share') % (stock_code.upper(), open_data)
+    return _('%s quote is $%s per share') % (stock_code.upper(), closed_data)
 
 
 def process_bot_message(message):
